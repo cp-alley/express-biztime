@@ -6,6 +6,7 @@ const { NotFoundError, BadRequestError } = require("../expressError");
 const db = require("../db");
 const router = new express.Router();
 
+//TODO: add order by for consistent order
 /** Get list of all companies like {companies: [{code, name}, ...]} */
 router.get("/", async function (req, res) {
   const results = await db.query(
