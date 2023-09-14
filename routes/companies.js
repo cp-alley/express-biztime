@@ -39,8 +39,7 @@ router.get("/:code", async function (req, res) {
  * Return JSON like {company: {code, name, description}}
 */
 router.post("/", async function (req, res) {
-  if (req.body === undefined) throw new BadRequestError();
-  //FIXME: conditional is not being hit when request body is empty
+  if (!req.body) throw new BadRequestError();
 
   const { code, name, description } = req.body;
   const results = await db.query(
@@ -58,7 +57,8 @@ router.post("/", async function (req, res) {
  * Return JSON like {company: {code, name, description}}
 */
 router.put("/:code", async function (req, res) {
-  if (req.body === undefined) throw new BadRequestError();
+  if (!req.body) throw new BadRequestError();
+
   const code = req.params.code;
   const { name, description } = req.body;
 
@@ -73,7 +73,7 @@ router.put("/:code", async function (req, res) {
 
   const company = results.rows[0];
 
-  if (company === undefined) throw new NotFoundError("Company is not found.");
+  if (!company) throw new NotFoundError("Company is not found.");
   return res.json({ company });
 });
 
@@ -88,7 +88,7 @@ router.delete("/:code", async function (req, res) {
   );
   const company = results.rows[0];
 
-  if (company === undefined) throw new NotFoundError("Company is not found.");
+  if (!company) throw new NotFoundError("Company is not found.");
   return res.json({ status: "deleted" });
 });
 
