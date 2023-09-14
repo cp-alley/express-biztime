@@ -31,7 +31,7 @@ router.get("/:id", async function (req, res) {
 
   const invoices = iResults.rows[0];
 
-  if (!invoices) throw new NotFoundError("Invoice is not found.");
+  if (!invoices) throw new NotFoundError("Invoice not found.");
 
   const cResults = await db.query(
     `SELECT code, name, description
