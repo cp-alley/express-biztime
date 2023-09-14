@@ -15,6 +15,7 @@ router.get("/", async function (req, res) {
         ORDER BY id`
   );
   const invoices = results.rows;
+
   return res.json({ invoices });
 });
 
@@ -28,7 +29,6 @@ router.get("/:id", async function (req, res) {
       FROM invoices
       WHERE id = $1`, [id]
   );
-
   const invoices = iResults.rows[0];
 
   if (!invoices) throw new NotFoundError("Invoice not found.");
@@ -39,7 +39,7 @@ router.get("/:id", async function (req, res) {
       JOIN invoices ON companies.code = invoices.comp_code
       WHERE invoices.id = $1`, [id]
   );
-
+  //FIXME: fix companies to company => only looking at one company
   const companies = cResults.rows;
 
   invoices.company = companies;
@@ -68,8 +68,8 @@ router.post("/", async function (req, res) {
       RETURNING id, comp_code, amt, paid, add_date, paid_date`,
     [comp_code, amt]
   );
-
   const invoice = iResults.rows[0];
+
   return res.status(201).json({ invoice });
 });
 
@@ -90,10 +90,9 @@ router.put("/:id", async function (req, res) {
       RETURNING id, comp_code, amt, paid, add_date, paid_date`,
     [amt, id]
   );
-
   const invoice = results.rows[0];
-
   if (!invoice) throw new NotFoundError("Invoice was not found.");
+
   return res.json({ invoice });
 });
 
@@ -104,11 +103,12 @@ router.delete("/:id", async function (req, res) {
   const results = await db.query(
     `DELETE FROM invoices
      WHERE id = $1
-     RETURNING id`, [id]
+     RETURNING id`,
+     [id]
   );
   const invoice = results.rows[0];
-
   if (!invoice) throw new NotFoundError("Invoice was not found.");
+
   return res.json({ status: "deleted" });
 });
 
