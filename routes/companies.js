@@ -18,19 +18,30 @@ router.get("/", async function (req, res) {
   return res.json({ companies });
 });
 
-/** Get company details like {company: {code, name, description}} */
+/** Get company details like
+ * {company: {code, name, description, invoices: [id,...]}} */
 router.get("/:code", async function (req, res) {
   const code = req.params.code;
 
-  const results = await db.query(
+  const cResults = await db.query(
     `SELECT code, name, description
       FROM companies
       WHERE code = $1`, [code]
   );
 
-  const company = results.rows[0];
+  const company = cResults.rows[0];
 
-  if (company === undefined) throw new NotFoundError("Company is not found.");
+  if (company === undefined) throw new NotFoundError("Company not found.");
+
+  const iResults = await db.query(
+    `SELECT id
+      FROM invoices
+      WHERE comp_code = $1
+      ORDER BY id`, [code]
+  );
+
+  const invoices = iResults.rows;
+  company.invoices = invoices.map(i => i.id);
 
   return res.json({ company });
 });
@@ -40,7 +51,7 @@ router.get("/:code", async function (req, res) {
  * Return JSON like {company: {code, name, description}}
 */
 router.post("/", async function (req, res) {
-  if (!req.body) throw new BadRequestError();
+  if (!req.body) throw new BadRequestError("Needs code, name, and description.");
 
   const { code, name, description } = req.body;
   const results = await db.query(
@@ -58,7 +69,7 @@ router.post("/", async function (req, res) {
  * Return JSON like {company: {code, name, description}}
 */
 router.put("/:code", async function (req, res) {
-  if (!req.body) throw new BadRequestError();
+  if (!req.body) throw new BadRequestError("Needs name and description.");
 
   const code = req.params.code;
   const { name, description } = req.body;
@@ -74,7 +85,7 @@ router.put("/:code", async function (req, res) {
 
   const company = results.rows[0];
 
-  if (!company) throw new NotFoundError("Company is not found.");
+  if (!company) throw new NotFoundError("Company not found.");
   return res.json({ company });
 });
 
@@ -89,7 +100,7 @@ router.delete("/:code", async function (req, res) {
   );
   const company = results.rows[0];
 
-  if (!company) throw new NotFoundError("Company is not found.");
+  if (!company) throw new NotFoundError("Company not found.");
   return res.json({ status: "deleted" });
 });
 
