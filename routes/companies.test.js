@@ -34,13 +34,18 @@ describe("GET /companies/:code", function () {
   test("Gets single company", async function () {
     const resp = await request(app).get(`/companies/${testCompany.code}`);
     expect(resp.body).toEqual({
-       company: {
+      company: {
         code: testCompany.code,
         name: testCompany.name,
         description: testCompany.description,
         invoices: []
       }
     });
+  });
+
+  test("404 if company not found", async function () {
+    const resp = await request(app).get(`/companies/99`);
+    expect(resp.statusCode).toEqual(404);
   });
 });
 
@@ -55,7 +60,7 @@ describe("POST /companies", function () {
         code: "test2",
         name: "test2name",
         description: "another amazing company"
-       });
+      });
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       company: {
@@ -68,8 +73,8 @@ describe("POST /companies", function () {
 
   test("400 if empty request body", async function () {
     const resp = await request(app)
-        .post("/companies")
-        .send();
+      .post("/companies")
+      .send();
     expect(resp.statusCode).toEqual(400);
   });
 });
@@ -81,11 +86,11 @@ describe("POST /companies", function () {
 describe("PUT /companies/:code", function () {
   test("Update single company", async function () {
     const resp = await request(app)
-        .put(`/companies/${testCompany.code}`)
-        .send({
-          name: "Yes",
-          description: "Yes"
-        });
+      .put(`/companies/${testCompany.code}`)
+      .send({
+        name: "Yes",
+        description: "Yes"
+      });
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual({
       company: {
@@ -98,18 +103,30 @@ describe("PUT /companies/:code", function () {
 
   test("404 if not found", async function () {
     const resp = await request(app)
-        .put(`/companies/99`)
-        .send({
-          name: "Yes",
-          description: "Yes"
-        });
+      .put(`/companies/99`)
+      .send({
+        name: "Yes",
+        description: "Yes"
+      });
     expect(resp.statusCode).toEqual(404);
   });
 
   test("400 if empty body request", async function () {
-    const resp = await request (app)
-        .put(`/companies/${testCompany.code}`)
-        .send();
+    const resp = await request(app)
+      .put(`/companies/${testCompany.code}`)
+      .send();
     expect(resp.statusCode).toEqual(400);
+  });
+});
+
+/** DELETE /companies/:code - delete company
+ * return {status: "deleted"}
+ */
+describe("DELETE /companies/:code", function () {
+  test("Delete single company", async function () {
+    const resp = await request(app)
+      .delete(`/companies/${testCompany.code}`);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({ status: "deleted" });
   });
 });
